@@ -4,8 +4,11 @@ import AuthPageInput from "../../components/AuthPageInput/AuthPageInput";
 import RightTopButton from "../../components/RightTopButton/RightTopButton";
 import { useInput } from "../../hooks/useInput";
 import * as s from "./style";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 function SingupPage() {
+    const navigate = useNavigate();
 
     const [ username, setUsername, userNameChange ] = useInput();
     const [ password, setPassword, passwordChange ] = useInput();
@@ -13,7 +16,57 @@ function SingupPage() {
     const [ name, setName, nameChange ] = useInput();
     const [ email, setEmail, emailChange ] = useInput();
 
+    const [ messageGroup, setMessageGroup ] = useState({
+        username : null,
+        password : null,
+        checkPassword : null,
+        name : null,
+        email : null
+    });
+
+
+    const handleCheckPassword = (e) => {
+
+        if(!!e.target.value) {
+            setMessageGroup((messageGroup) => {
+                return {
+                    ...messageGroup,
+                    checkPassword : {
+                        type : checkPassword === password ? "success" : "error",
+                        text : checkPassword === password ? "" : "비밀번호가 서로 일치하지 않습니다."
+                    }
+                }
+            });
+        }else {
+            setMessageGroup((messageGroup) => {
+                return {
+                    ...messageGroup,
+                    checkPassword : null
+                }
+            })
+        }
+
+    }
+
     const handleSignupSubmit = () => {
+
+        if(messageGroup?.checkPassword?.type === "error") {
+            alert("가입할 회원의 정보를 다시 확인하세요.");
+            return;
+        }
+
+        if(!checkPassword) {
+            setMessageGroup((messageGroup) => {
+                return {
+                    ...messageGroup,
+                    checkPassword : {
+                        type : "error",
+                        text : "비밀번호를 입력하세요"
+                    }
+                }
+            });
+            return;
+        }
 
         const singupData = {
             username,
@@ -28,12 +81,61 @@ function SingupPage() {
     }
 
     const signupRequest = async (singupData) => {
+
         try {
             const response = await axios.post("http://localhost:8080/auth/signup", singupData);
-            console.log(response);
+            console.log(response.data); // true
+            if(response.data) {
+                navigate("/auth/signin");
+            }
         } catch (error) {
-            console.log(error);
+            const errorMap = error.response.data;
+            const entries = Object.entries(errorMap);
+            let newMessageGroup = {
+                username: {
+                    type : "success",
+                    text : "사용할 수 있는 사용자 이름 입니다."
+                },
+                password: {
+                    type : "success",
+                    text : ""
+                },
+                checkPassword: {
+                    type : "success",
+                    text : ""
+                },
+                name: {
+                    type : "success",
+                    text : ""
+                },
+                email: {
+                    type : "success",
+                    text : ""
+                }
+            };
+
+            for(let [ key, value ] of entries) {
+                newMessageGroup = {
+                    ...newMessageGroup,
+                    [key]: {
+                        type: "error",
+                        text: value
+                    }
+                }
+            }
+
+            if(newMessageGroup.password.type === "error") {
+                newMessageGroup = {
+                    ...newMessageGroup,
+                    checkPassword: null
+                };
+                setPassword(() => "");
+                setChekcPassword(() => "");
+            }
+
+            setMessageGroup(() => newMessageGroup);
         }
+
     }
 
     return (
@@ -42,11 +144,11 @@ function SingupPage() {
                 <h1>회원가입</h1>
                 <RightTopButton onClick={handleSignupSubmit}>가입하기</RightTopButton>
             </div>
-            <AuthPageInput type={"text"} name={"username"} placeholder={"사용자 이름"} value={username} onChange={userNameChange} />
-            <AuthPageInput type={"password"} name={"password"} placeholder={"비밀번호"} value={password} onChange={passwordChange} />
-            <AuthPageInput type={"password"} name={"checkPassword"} placeholder={"비밀번호 확인"} value={checkPassword} onChange={checkPasswordChange} />
-            <AuthPageInput type={"text"} name={"name"} placeholder={"성명"} value={name} onChange={nameChange} />
-            <AuthPageInput type={"text"} name={"email"} placeholder={"이메일"} value={email} onChange={emailChange} />
+            <AuthPageInput type={"text"} name={"username"} placeholder={"사용자 이름"} value={username} onChange={userNameChange} message={messageGroup.username} />
+            <AuthPageInput type={"password"} name={"password"} placeholder={"비밀번호"} value={password} onChange={passwordChange} message={messageGroup.password} />
+            <AuthPageInput type={"password"} name={"checkPassword"} placeholder={"비밀번호 확인"} value={checkPassword} onChange={checkPasswordChange} onBlur={handleCheckPassword} message={messageGroup.checkPassword} />
+            <AuthPageInput type={"text"} name={"name"} placeholder={"성명"} value={name} onChange={nameChange} message={messageGroup.name} />
+            <AuthPageInput type={"text"} name={"email"} placeholder={"이메일"} value={email} onChange={emailChange} message={messageGroup.email} />
         </>
     )
 
