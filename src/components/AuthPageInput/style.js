@@ -27,7 +27,7 @@ export const inputIcon = (type) => css`
 `;
 
 export const messageBox = (type) => css`
-    padding: 5px 10px;
+    padding: ${type === "error" ? "5px 10px" : 0};
     width: 100%;
     color: ${type === 'error' ? "#ff3030" : "#00921b"};
     font-size: 11px;
