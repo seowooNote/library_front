@@ -24,15 +24,36 @@ export const menuButton = css`
     }
 `;
 
+export const accountItems = css`
+    display: flex;
+    align-items: center;
+    height: 100%;
+`;
+
+export const logout = css`
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0px 0px;
+    border: none;
+    border-radius: 50%;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    overflow: hidden;
+    background-color: transparent;
+    cursor: pointer;
+`;
+
 export const account = css`
     display: flex;
     justify-content: center;
     align-items: center;
     margin: 0px 8px;
-    border: 1px solid #dbdbdb;
+    border: none;
     border-radius: 50%;
-    width: 25px;
-    height: 25px;
+    width: 30px;
+    height: 30px;
     overflow: hidden;
     text-decoration: none;
     color: #222222;
