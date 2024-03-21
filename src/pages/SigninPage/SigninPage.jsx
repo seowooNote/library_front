@@ -34,9 +34,9 @@ function SigninPage() {
             <AuthPageInput type={"password"} name={"password"} placeholder={"비밀번호"} value={password} onChange={passwordChange}/>
             <Link to={"/auth/signup"}>회원가입</Link>
             <div>
-                <Link to={"/auth/signup"}>카카오 로그인</Link>
-                <Link to={"/auth/signup"}>구글 로그인</Link>
-                <Link to={"/auth/signup"}>네이버 로그인</Link>
+                <a>카카오 로그인</a>
+                <a href="http://localhost:8080/oauth2/authorization/google">구글 로그인</a>
+                <a>네이버 로그인</a>
             </div>
         </>
     )
