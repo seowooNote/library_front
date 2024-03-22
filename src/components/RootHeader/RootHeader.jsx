@@ -40,6 +40,7 @@ function RootHeader() {
       return config;
     });
     queryClient.refetchQueries("principalQuery");
+    window.location.replace("/auth/signin");
   };
 
   return (

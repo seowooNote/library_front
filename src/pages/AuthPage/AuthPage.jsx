@@ -8,12 +8,14 @@ import * as s from "./style";
 import { Route, Routes } from "react-router-dom";
 import { useQueryClient } from "react-query";
 import { useEffect } from "react";
+import OAuth2MergePage from "../OAuth2MergePage/OAuth2MergePage";
 
 function AuthPage() {
   const queryClient = useQueryClient();
-  const principalData = queryClient.getQueriesData("principalQuery");
+  const principalData = queryClient.getQueryData("principalQuery");
 
   useEffect(() => {
+    console.log(principalData)
     if(!!principalData) {
       alert("잘못된 접근입니다.");
       window.location.replace("/");
@@ -27,7 +29,7 @@ function AuthPage() {
             <Route path="/signup" element={ <SingupPage /> } />
             <Route path="/oauth2" element={ <OAuth2Page /> }/>
             <Route path="/oauth2/signin" element={ <OAuth2SinginPage/> } />
-            <Route path="/oauth2/merge"/>
+            <Route path="/oauth2/merge" element={ <OAuth2MergePage /> }/>
             <Route path="/oauth2/signup" element={ <OAuth2SignupPage /> } />
         </Routes>
     </div>
