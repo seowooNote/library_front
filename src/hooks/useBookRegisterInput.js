@@ -1,13 +1,13 @@
 import { useState } from "react"
 
-export const useBookRegiseterInput = (enterFn, ref) => {
+export const useBookRegisterInput = (enterFn, ref) => {
     const [ value, setValue ] = useState("");
 
     const handleOnChange = (e) => {
         if(!!e.target) {
-            setValue(() => e.target.value); // input
+            setValue(() => e.target.value);
         } else {
-            setValue(() => e.value); // select
+            setValue(() => e.value);
         }
     }
 

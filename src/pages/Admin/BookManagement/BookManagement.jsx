@@ -6,38 +6,49 @@ import { useMutation, useQuery } from "react-query";
 import { getAllBookTypeRequest, getAllCategoryRequest } from "../../../apis/api/options";
 import { useRef, useState } from "react";
 import { CiSquarePlus } from "react-icons/ci";
-import { useBookRegiseterInput } from "../../../hooks/useHookRegisterInput";
+
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 import { storage } from "../../../apis/firebase/config/firebaseConfig";
 import { v4 as uuid } from "uuid";
-import { upload } from "@testing-library/user-event/dist/upload";
 import RightTopButton from "../../../components/RightTopButton/RightTopButton";
 import { registerBook } from "../../../apis/api/bookApi";
+import AdminBookSearch from "../../../components/AdminBookSearch/AdminBookSearch";
+import { useBookRegisterInput } from "../../../hooks/useBookRegisterInput";
 
-function BookManagement() {
+function BookManagement(props) {
     const [ bookTypeOptions, setBookTypeOptions ] = useState([]);
     const [ categoryOptions, setCategoryOptions ] = useState([]);
+    const [ searchRefresh, setSearchRefresh ] = useState(false);
     const fileRef = useRef();
     const inputRefs = [
-        useRef(), // 0 bookId
-        useRef(), // 1 isbn
-        useRef(), // 2 도서형식
-        useRef(), // 3 카테고리
-        useRef(), // 4 도서명
-        useRef(), // 5 저자명
-        useRef(), // 6 출판사
-        useRef()  // 7 URL
+        useRef(),   // 0 bookId
+        useRef(),   // 1 isbn
+        useRef(),   // 2 도서형식
+        useRef(),   // 3 카테고리
+        useRef(),   // 4 도서명
+        useRef(),   // 5 저자명
+        useRef(),   // 6 출판사
+        useRef()    // 7 URL
     ];
+
+    // const ir1=    useRef()   // 0 bookId
+    // const ir2=    useRef()   // 1 isbn
+    // const ir3=    useRef()   // 2 도서형식
+    // const ir4=    useRef()   // 3 카테고리
+    // const ir5=    useRef()   // 4 도서명
+    // const ir6=    useRef()   // 5 저자명
+    // const ir7=    useRef()   // 6 출판사
+    // const ir8=    useRef()   // 7 URL
 
     const bookTypeQuery = useQuery(
         ["bookTypeQuery"], 
         getAllBookTypeRequest,
         {
-            onSuccess: (response) => {
-                setBookTypeOptions(() => response.data.map((bookType) => {
+            onSuccess: response => {
+                setBookTypeOptions(() => response.data.map(bookType => {
                     return {
-                        value : bookType.bookTypeId,
-                        label : bookType.bookTypeName
+                        value: bookType.bookTypeId,
+                        label: bookType.bookTypeName
                     }
                 }));
             },
@@ -53,8 +64,8 @@ function BookManagement() {
         ["categoryQuery"], 
         getAllCategoryRequest,
         {
-            onSuccess: (response) => {
-                setCategoryOptions(() => response.data.map((category) => {
+            onSuccess: response => {
+                setCategoryOptions(() => response.data.map(category => {
                     return {
                         value: category.categoryId,
                         label: category.categoryName
@@ -72,15 +83,14 @@ function BookManagement() {
     const registerBookMutation = useMutation({
         mutationKey: "registerBookMutation",
         mutationFn: registerBook,
-        onSuccess: (response) => {
+        onSuccess: response => {
 
         },
-        onError: (error) => {
+        onError: error => {
 
         }
-    });
+    }); 
 
-    
     const nextInput = (ref) => {
         ref.current.focus();
     }
@@ -92,7 +102,7 @@ function BookManagement() {
             categoryId: categoryId.value,
             bookName: bookName.value,
             authorName: authorName.value,
-            publisherName: publisher.value,
+            publisherName: publisherName.value,
             coverImgUrl: imgUrl.value
         });
 
@@ -103,25 +113,22 @@ function BookManagement() {
             categoryId.value, 
             bookName.value, 
             authorName.value, 
-            publisher.value, 
+            publisherName.value, 
             imgUrl.value
         ]);
     }
 
-    const bookId = useBookRegiseterInput(nextInput, inputRefs[1]);
-    const isbn = useBookRegiseterInput(nextInput, inputRefs[2]);
-    const bookTypeId = useBookRegiseterInput(nextInput, inputRefs[3]);
-    const categoryId = useBookRegiseterInput(nextInput, inputRefs[4]);
-    const bookName = useBookRegiseterInput(nextInput, inputRefs[5]);
-    const authorName = useBookRegiseterInput(nextInput, inputRefs[6]);
-    const publisher = useBookRegiseterInput(nextInput, inputRefs[7]);
-    const imgUrl = useBookRegiseterInput(submit);
-
-    
-
+    const bookId = useBookRegisterInput(nextInput, inputRefs[1]);
+    const isbn = useBookRegisterInput(nextInput, inputRefs[2]);
+    const bookTypeId = useBookRegisterInput(nextInput, inputRefs[3]);
+    const categoryId = useBookRegisterInput(nextInput, inputRefs[4]);
+    const bookName = useBookRegisterInput(nextInput, inputRefs[5]);
+    const authorName = useBookRegisterInput(nextInput, inputRefs[6]);
+    const publisherName = useBookRegisterInput(nextInput, inputRefs[7]);
+    const imgUrl = useBookRegisterInput(submit);
 
     const selectStyle = {
-        control: (baseStyles) => ({
+        control: baseStyles => ({
             ...baseStyles,
             borderRadius: "0px",
             border: "none",
@@ -144,7 +151,7 @@ function BookManagement() {
             return;
         }
 
-        const storageRef = ref(storage, `library/book/cover/${uuid()}_${files[0].name}`); // firebase 경로
+        const storageRef = ref(storage, `library/book/cover/${uuid()}_${files[0].name}`);
         const uploadTask = uploadBytesResumable(storageRef, files[0]);
 
         uploadTask.on(
@@ -154,11 +161,12 @@ function BookManagement() {
             () => {
                 alert("업로드를 완료하셨습니다.");
                 getDownloadURL(storageRef)
-                .then((url) => {
+                .then(url => {
                     imgUrl.setValue(() => url);
                 });
             }
         )
+
     }
 
     return (
@@ -174,16 +182,16 @@ function BookManagement() {
                             <th css={s.registerTh}>도서코드</th>
                             <td>
                                 <BookRegisterInput 
-                                    value={bookId.value}
+                                    value={bookId.value} 
                                     bookref={inputRefs[0]}
                                     onChange={bookId.handleOnChange}
                                     onKeyDown={bookId.handleOnKeyDown}
                                 />
                             </td>
-                            <th css={s.registerTh}>ISBM</th>
+                            <th css={s.registerTh}>ISBN</th>
                             <td>
-                                <BookRegisterInput
-                                    value={isbn.value}
+                                <BookRegisterInput 
+                                    value={isbn.value} 
                                     bookref={inputRefs[1]}
                                     onChange={isbn.handleOnChange}
                                     onKeyDown={isbn.handleOnKeyDown}
@@ -191,41 +199,41 @@ function BookManagement() {
                             </td>
                             <td rowSpan={5} css={s.preview}>
                                 <div css={s.imageBox}>
-                                    <img src={!imgUrl.value 
-                                        ? "https://media.istockphoto.com/id/1159947597/vector/add-photos-concept-line-icon-simple-element-illustration.jpg?s=612x612&w=0&k=20&c=eU2aJxlWFKDle1-NS8KBOzRYrEgSSJ4QVKorAmp467M=" 
-                                        : imgUrl.value} 
-                                    alt="" />
+                                    <img src={
+                                        !imgUrl.value 
+                                        ? "https://www.shutterstock.com/image-vector/no-image-available-picture-coming-600nw-2057829641.jpg"
+                                        : imgUrl.value
+                                    } alt="" />
                                 </div>
                             </td>
                         </tr>
                         <tr>
                             <th css={s.registerTh}>도서형식</th>
                             <td>
-                                <Select
-                                    styles={selectStyle}
+                                <Select 
+                                    styles={selectStyle} 
                                     options={bookTypeOptions}
-                                    ref={inputRefs[2]}
-                                    onChange={bookTypeId.handleOnChange}
                                     onKeyDown={bookTypeId.handleOnKeyDown}
+                                    onChange={bookTypeId.handleOnChange}
+                                    ref={inputRefs[2]}
                                 />
                             </td>
                             <th css={s.registerTh}>카테고리</th>
                             <td>
                                 <Select 
-                                    styles={selectStyle}
+                                    styles={selectStyle} 
                                     options={categoryOptions}
-                                    ref={inputRefs[3]}
-                                    onChange={categoryId.handleOnChange}
                                     onKeyDown={categoryId.handleOnKeyDown}
+                                    onChange={categoryId.handleOnChange}
+                                    ref={inputRefs[3]}
                                 />
-                                    
                             </td>
                         </tr>
                         <tr>
                             <th css={s.registerTh}>도서명</th>
                             <td colSpan={3}>
-                                <BookRegisterInput
-                                    value={bookName.value}
+                                <BookRegisterInput 
+                                    value={bookName.value} 
                                     bookref={inputRefs[4]}
                                     onChange={bookName.handleOnChange}
                                     onKeyDown={bookName.handleOnKeyDown}
@@ -235,8 +243,8 @@ function BookManagement() {
                         <tr>
                             <th css={s.registerTh}>저자명</th>
                             <td>
-                                <BookRegisterInput
-                                    value={authorName.value}
+                                <BookRegisterInput 
+                                    value={authorName.value} 
                                     bookref={inputRefs[5]}
                                     onChange={authorName.handleOnChange}
                                     onKeyDown={authorName.handleOnKeyDown}
@@ -244,11 +252,11 @@ function BookManagement() {
                             </td>
                             <th css={s.registerTh}>출판사</th>
                             <td>
-                                <BookRegisterInput
-                                    value={publisher.value}
+                                <BookRegisterInput 
+                                    value={publisherName.value} 
                                     bookref={inputRefs[6]}
-                                    onChange={publisher.handleOnChange}
-                                    onKeyDown={publisher.handleOnKeyDown}
+                                    onChange={publisherName.handleOnChange}
+                                    onKeyDown={publisherName.handleOnKeyDown}
                                 />
                             </td>
                         </tr>
@@ -257,26 +265,37 @@ function BookManagement() {
                             <td colSpan={3}>
                                 <div css={s.imgUrl}>
                                     <span css={s.imgUrlBox}>
-                                        <BookRegisterInput
-                                            value={imgUrl.value}
+                                        <BookRegisterInput 
+                                            value={imgUrl.value} 
                                             bookref={inputRefs[7]}
                                             onChange={imgUrl.handleOnChange}
                                             onKeyDown={imgUrl.handleOnKeyDown}
                                         />
                                     </span>
-                                    <input type="file" style={{display: "none"}} onChange={handleFileChange} ref={fileRef} />
+                                    <input 
+                                        type="file" 
+                                        style={{
+                                            display: "none"
+                                        }}
+                                        onChange={handleFileChange}
+                                        ref={fileRef}
+                                    />
                                     <button css={s.imgAddButton} onClick={() => fileRef.current.click()}>
-                                        <CiSquarePlus/>
+                                        <CiSquarePlus />
                                     </button>
                                 </div>
                             </td>
                         </tr>
                     </tbody>
                 </table>
-                <div></div>
             </div>
+            <AdminBookSearch
+                selectStyle={selectStyle} 
+                bookTypeOptions={bookTypeOptions}
+                categoryOptions={categoryOptions}
+            />
         </div>
-    )
+    );
 }
 
 export default BookManagement;
