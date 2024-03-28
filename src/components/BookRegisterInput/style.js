@@ -7,4 +7,7 @@ export const inputBox = css`
     padding: 0px 10px;
     width: 100%;
     height: 100%;
+    &:disabled {
+        background-color: white;
+    }
 `;

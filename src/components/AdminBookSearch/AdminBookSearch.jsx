@@ -3,15 +3,15 @@ import Select from "react-select";
 import * as s from "./style";
 import { useReactSelect } from "../../hooks/useReactSelect";
 import { useBookRegisterInput } from "../../hooks/useBookRegisterInput";
-import { useQuery } from "react-query";
-import { getBookCountRequest, searchBooksRequest } from "../../apis/api/bookApi";
+import { useMutation, useQuery } from "react-query";
+import { deleteBooksRequest, getBookCountRequest, searchBooksRequest } from "../../apis/api/bookApi";
 import { useSearchParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import AdminBookSearchPageNumbers from "../AdminBookSearchPageNumbers/AdminBookSearchPageNumbers";
 import { useRecoilState } from "recoil";
 import { selectedBookState } from "../../atoms/adminSelectedBookAtom";
 
-function AdminBookSearch({ selectStyle, bookTypeOptions, categoryOptions }) {
+function AdminBookSearch({ selectStyle, bookTypeOptions, categoryOptions, isDelete, setDelete }) {
     const [ searchParams, setSearchParams ] = useSearchParams();
     const searchCount = 20;
     const [ bookList, setBookList ] = useState([]);
@@ -68,6 +68,27 @@ function AdminBookSearch({ selectStyle, bookTypeOptions, categoryOptions }) {
             }
         }
     );
+
+    const deleteBooksMutation = useMutation({
+        mutationKey : "deleteBooksMutation",
+        mutationFn : deleteBooksRequest,
+        onSuccess : (response) => {
+            alert("삭제완료");
+            window.location.replace("/admin/book/management?page=1");
+        },
+        onError : (error) => {
+
+        }
+    })
+
+    useEffect(() => {
+        if(isDelete) {
+            const deleteBooks = bookList.filter((book) => book.checked).map((book) => book.bookId);
+            console.log(deleteBooks);
+            deleteBooksMutation.mutate(deleteBooks);
+        }
+        setDelete(() => false);
+    }, [isDelete]);
 
     const searchSubmit = () => {
         console.log([
